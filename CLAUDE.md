@@ -39,6 +39,22 @@ HazoNotesIcon (main entry)
 - Dynamically loads Popover or Sheet components based on `panel_style`
 - Shows visual indicator (amber background) when notes exist
 - Auto-fetches user info from `/api/hazo_auth/me` if not provided
+- Configurable icon size and border visibility
+
+Key styling props:
+- `icon_size`: Button size in pixels (default: 36). The inner icon scales proportionally (~55% of button size).
+- `show_border`: Whether to display a border around the button (default: true). When false, renders a borderless icon suitable for inline or toolbar usage.
+
+```tsx
+// Default 36px button with border
+<HazoNotesIcon ref_id="123" />
+
+// Compact 24px button without border
+<HazoNotesIcon ref_id="123" icon_size={24} show_border={false} />
+
+// Large 48px button with border
+<HazoNotesIcon ref_id="123" icon_size={48} />
+```
 
 **HazoNotesPanel** (`src/components/hazo_notes_panel.tsx`)
 - Notes display and input panel

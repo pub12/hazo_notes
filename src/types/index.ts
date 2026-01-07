@@ -195,6 +195,10 @@ export interface HazoNotesIconProps {
   disabled?: boolean;
   /** Additional CSS class names */
   className?: string;
+  /** Icon button size in pixels (default: 36) */
+  icon_size?: number;
+  /** Whether to show border around the icon button (default: true) */
+  show_border?: boolean;
 }
 
 /**

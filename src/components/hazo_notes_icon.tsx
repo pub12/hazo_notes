@@ -14,16 +14,15 @@ import { use_logger } from '../logger/context.js';
 import { use_notes } from '../hooks/use_notes.js';
 
 // Default IoDocumentText icon (inline SVG to avoid hard dependency on react-icons)
-function DocumentIcon({ className }: { className?: string }) {
+function DocumentIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
   return (
     <svg
       className={className}
+      style={style}
       stroke="currentColor"
       fill="currentColor"
       strokeWidth="0"
       viewBox="0 0 512 512"
-      height="1em"
-      width="1em"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path d="M428 224H288a48 48 0 01-48-48V36a4 4 0 00-4-4h-92a64 64 0 00-64 64v320a64 64 0 0064 64h224a64 64 0 0064-64V228a4 4 0 00-4-4zm-92 160H176a16 16 0 010-32h160a16 16 0 010 32zm0-80H176a16 16 0 010-32h160a16 16 0 010 32z" />
@@ -56,6 +55,8 @@ export function HazoNotesIcon({
   on_close,
   disabled,
   className,
+  icon_size = 36,
+  show_border = true,
 }: HazoNotesIconProps) {
   const logger = use_logger();
   const [is_open, set_is_open] = useState(false);
@@ -239,19 +240,28 @@ export function HazoNotesIcon({
     return null;
   }
 
+  // Calculate icon size (approximately 55% of button size)
+  const inner_icon_size = Math.round(icon_size * 0.55);
+
   // Render trigger button
   const trigger_button = (
     <button
       type="button"
       className={cn(
-        'cls_hazo_notes_icon flex h-9 w-9 items-center justify-center rounded-md border border-input bg-transparent text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-        has_notes && 'bg-amber-100 border-amber-500',
+        'cls_hazo_notes_icon flex items-center justify-center rounded-md bg-transparent text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
+        show_border && 'border border-input',
+        has_notes && 'bg-amber-100',
+        has_notes && show_border && 'border-amber-500',
         className
       )}
+      style={{ width: icon_size, height: icon_size }}
       aria-label={`Notes for ${label}`}
       title={`Notes for ${label}${has_notes ? ` (${display_count})` : ''}`}
     >
-      <DocumentIcon className={cn('h-5 w-5', has_notes && 'text-amber-600')} />
+      <DocumentIcon
+        className={cn(has_notes && 'text-amber-600')}
+        style={{ width: inner_icon_size, height: inner_icon_size }}
+      />
     </button>
   );
 

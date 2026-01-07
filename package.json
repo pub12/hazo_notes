@@ -1,6 +1,6 @@
 {
   "name": "hazo_notes",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Database-backed notes system with file attachment support for the hazo ecosystem",
   "type": "module",
   "main": "./dist/index.client.js",

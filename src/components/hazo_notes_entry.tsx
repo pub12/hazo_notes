@@ -30,7 +30,8 @@ function format_timestamp(iso_timestamp: string): string {
 /**
  * Get initials from name for avatar
  */
-function get_initials(name: string): string {
+function get_initials(name: string | undefined): string {
+  if (!name) return '??';
   const parts = name.trim().split(/\s+/);
   if (parts.length >= 2) {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
@@ -41,12 +42,13 @@ function get_initials(name: string): string {
 /**
  * Generate consistent hex color from name for avatar background
  */
-function get_avatar_color(name: string): string {
+function get_avatar_color(name: string | undefined): string {
   const colors = [
     '#ef4444', '#f97316', '#d97706', '#22c55e',
     '#14b8a6', '#3b82f6', '#6366f1', '#a855f7',
     '#ec4899', '#f43f5e',
   ];
+  if (!name) return colors[0]; // default to first color
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
@@ -75,13 +77,14 @@ export function HazoNotesEntry({ note, ProfileStampComponent }: HazoNotesEntryPr
     }
 
     // Fallback to image or initials
+    const display_name = user_name || 'Unknown User';
     if (user_avatar) {
       return (
         <img
           src={user_avatar}
-          alt={user_name}
+          alt={display_name}
           className="w-7 h-7 rounded-full object-cover flex-shrink-0"
-          title={user_name}
+          title={display_name}
         />
       );
     }
@@ -94,7 +97,7 @@ export function HazoNotesEntry({ note, ProfileStampComponent }: HazoNotesEntryPr
           backgroundColor: get_avatar_color(user_name),
           color: '#ffffff',
         }}
-        title={user_name}
+        title={display_name}
       >
         {get_initials(user_name)}
       </span>

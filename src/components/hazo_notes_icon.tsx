@@ -119,18 +119,19 @@ export function HazoNotesIcon({
     }
   }, [current_user, logger]);
 
-  // Load Popover components
+  // Load Popover components dynamically from consuming app
   useEffect(() => {
     if (panel_style === 'popover') {
       const loadComponents = async () => {
         try {
-          // @ts-expect-error - Module provided by consuming app
-          const popoverModule = await import('@/components/ui/popover').catch(() => null);
-          if (popoverModule) {
+          // Use variable to prevent webpack from resolving at build time
+          const popoverPath = '@/components/ui/popover';
+          const popoverModule = await import(/* webpackIgnore: true */ popoverPath).catch(() => null) as Record<string, unknown> | null;
+          if (popoverModule?.Popover) {
             setPopoverComponents({
-              Popover: popoverModule.Popover,
-              PopoverTrigger: popoverModule.PopoverTrigger,
-              PopoverContent: popoverModule.PopoverContent,
+              Popover: popoverModule.Popover as React.ComponentType<any>,
+              PopoverTrigger: popoverModule.PopoverTrigger as React.ComponentType<any>,
+              PopoverContent: popoverModule.PopoverContent as React.ComponentType<any>,
             });
           }
         } catch {
@@ -141,18 +142,19 @@ export function HazoNotesIcon({
     }
   }, [panel_style, logger]);
 
-  // Load Sheet components for slide_panel
+  // Load Sheet components dynamically from consuming app
   useEffect(() => {
     if (panel_style === 'slide_panel') {
       const loadComponents = async () => {
         try {
-          // @ts-expect-error - Module provided by consuming app
-          const sheetModule = await import('@/components/ui/sheet').catch(() => null);
-          if (sheetModule) {
+          // Use variable to prevent webpack from resolving at build time
+          const sheetPath = '@/components/ui/sheet';
+          const sheetModule = await import(/* webpackIgnore: true */ sheetPath).catch(() => null) as Record<string, unknown> | null;
+          if (sheetModule?.Sheet) {
             setSheetComponents({
-              Sheet: sheetModule.Sheet,
-              SheetTrigger: sheetModule.SheetTrigger,
-              SheetContent: sheetModule.SheetContent,
+              Sheet: sheetModule.Sheet as React.ComponentType<any>,
+              SheetTrigger: sheetModule.SheetTrigger as React.ComponentType<any>,
+              SheetContent: sheetModule.SheetContent as React.ComponentType<any>,
             });
           }
         } catch {

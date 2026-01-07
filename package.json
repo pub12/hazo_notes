@@ -1,0 +1,119 @@
+{
+  "name": "hazo_notes",
+  "version": "1.0.0",
+  "description": "Database-backed notes system with file attachment support for the hazo ecosystem",
+  "type": "module",
+  "main": "./dist/index.client.js",
+  "module": "./dist/index.client.js",
+  "types": "./dist/index.client.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.client.js",
+      "types": "./dist/index.client.d.ts"
+    },
+    "./api": {
+      "import": "./dist/api/index.js",
+      "types": "./dist/api/index.d.ts"
+    },
+    "./hooks": {
+      "import": "./dist/hooks/index.js",
+      "types": "./dist/hooks/index.d.ts"
+    },
+    "./components": {
+      "import": "./dist/components/index.js",
+      "types": "./dist/components/index.d.ts"
+    },
+    "./lib": {
+      "import": "./dist/lib/index.js",
+      "types": "./dist/lib/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "templates",
+    "migrations",
+    "README.md",
+    "SETUP_CHECKLIST.md"
+  ],
+  "workspaces": [
+    "test-app"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev:package": "tsc -p tsconfig.build.json --watch",
+    "dev:test-app": "npm run build && cd test-app && npm run dev",
+    "build:test-app": "npm run build && cd test-app && npm run build",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "prepublishOnly": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pub12/hazo_notes.git"
+  },
+  "keywords": [
+    "notes",
+    "hazo",
+    "react",
+    "typescript",
+    "nextjs",
+    "file-attachments"
+  ],
+  "author": "Pubs Abayasiri",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pub12/hazo_notes/issues"
+  },
+  "homepage": "https://github.com/pub12/hazo_notes#readme",
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "hazo_config": "^1.0.0",
+    "server-only": "^0.0.1",
+    "tailwind-merge": "^2.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "hazo_logs": "^1.0.0",
+    "next": "^14.2.33",
+    "typescript": "^5.3.0"
+  },
+  "peerDependencies": {
+    "@radix-ui/react-dialog": "^1.0.0",
+    "@radix-ui/react-popover": "^1.0.0",
+    "hazo_auth": "^5.0.0",
+    "hazo_connect": "^2.3.1",
+    "hazo_logs": "^1.0.0",
+    "next": ">=14.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-icons": "^5.0.0",
+    "tailwindcss": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "hazo_auth": {
+      "optional": true
+    },
+    "hazo_connect": {
+      "optional": true
+    },
+    "hazo_logs": {
+      "optional": true
+    },
+    "@radix-ui/react-popover": {
+      "optional": true
+    },
+    "@radix-ui/react-dialog": {
+      "optional": true
+    },
+    "react-icons": {
+      "optional": true
+    }
+  }
+}

@@ -1,0 +1,37 @@
+# Source files
+src/
+test-app/
+tsconfig*.json
+*.tsbuildinfo
+.turbo/
+coverage/
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+*.local
+
+# Sensitive config (keep templates)
+config/
+
+# Package management
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+
+# Development files
+.env*
+*.log
+logs/
+
+# Documentation (keep README)
+CLAUDE.md
+docs/
+
+# Git
+.git/
+.gitignore
+
+# Build artifacts not needed
+# Note: TypeScript declaration maps and source maps are kept for better DX

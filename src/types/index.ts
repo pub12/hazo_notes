@@ -121,6 +121,24 @@ export interface HazoNotesConfig {
 }
 
 /**
+ * Popover UI components from consuming app (e.g., shadcn/ui)
+ */
+export interface PopoverComponents {
+  Popover: React.ComponentType<any>;
+  PopoverTrigger: React.ComponentType<any>;
+  PopoverContent: React.ComponentType<any>;
+}
+
+/**
+ * Sheet UI components from consuming app (e.g., shadcn/ui)
+ */
+export interface SheetComponents {
+  Sheet: React.ComponentType<any>;
+  SheetTrigger: React.ComponentType<any>;
+  SheetContent: React.ComponentType<any>;
+}
+
+/**
  * Props for HazoNotesIcon component
  */
 export interface HazoNotesIconProps {
@@ -149,6 +167,12 @@ export interface HazoNotesIconProps {
   save_mode?: 'explicit' | 'auto';
   /** Notes panel background color (Tailwind class) */
   background_color?: string;
+
+  // UI Component injection (recommended for reliable operation)
+  /** Popover components from consuming app - pass to avoid dynamic import issues */
+  popover_components?: PopoverComponents;
+  /** Sheet components from consuming app - pass to avoid dynamic import issues */
+  sheet_components?: SheetComponents;
 
   // File options
   /** Enable file attachments */

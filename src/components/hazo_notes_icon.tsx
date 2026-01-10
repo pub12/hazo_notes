@@ -55,7 +55,7 @@ export function HazoNotesIcon({
   on_close,
   disabled,
   className,
-  icon_size = 36,
+  icon_size = 28,
   show_border = true,
 }: HazoNotesIconProps) {
   const logger = use_logger();
@@ -240,8 +240,8 @@ export function HazoNotesIcon({
     return null;
   }
 
-  // Calculate icon size (approximately 55% of button size)
-  const inner_icon_size = Math.round(icon_size * 0.55);
+  // Calculate icon size (approximately 57% of button size to match h-4 w-4 icons at 28px button)
+  const inner_icon_size = Math.round(icon_size * 0.57);
 
   // Render trigger button
   const trigger_button = (

@@ -36,24 +36,30 @@ HazoNotesIcon (main entry)
 **HazoNotesIcon** (`src/components/hazo_notes_icon.tsx`)
 - Main trigger button that opens the notes panel
 - Supports both controlled and uncontrolled modes
-- Dynamically loads Popover or Sheet components based on `panel_style`
+- **IMPORTANT**: Requires `popover_components` or `sheet_components` prop - cannot auto-import across package boundaries
 - Shows visual indicator (amber background) when notes exist
 - Auto-fetches user info from `/api/hazo_auth/me` if not provided
 - Configurable icon size and border visibility
 
-Key styling props:
+Key props:
+- `popover_components`: **Required for popover style** - `{ Popover, PopoverTrigger, PopoverContent }` from your UI library
+- `sheet_components`: **Required for slide_panel style** - `{ Sheet, SheetTrigger, SheetContent }` from your UI library
 - `icon_size`: Button size in pixels (default: 28). The inner icon scales proportionally (~57% of button size, so 28px → 16px inner icon). This matches the standard h-7/w-7 button with h-4/w-4 icon pattern used across hazo packages.
 - `show_border`: Whether to display a border around the button (default: true). When false, renders a borderless icon suitable for inline or toolbar usage.
 
 ```tsx
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+
+const popover_components = { Popover, PopoverTrigger, PopoverContent };
+
 // Default 28px button with border
-<HazoNotesIcon ref_id="123" />
+<HazoNotesIcon ref_id="123" popover_components={popover_components} />
 
 // Compact 24px button without border
-<HazoNotesIcon ref_id="123" icon_size={24} show_border={false} />
+<HazoNotesIcon ref_id="123" icon_size={24} show_border={false} popover_components={popover_components} />
 
 // Large 36px button with border
-<HazoNotesIcon ref_id="123" icon_size={36} />
+<HazoNotesIcon ref_id="123" icon_size={36} popover_components={popover_components} />
 ```
 
 **HazoNotesPanel** (`src/components/hazo_notes_panel.tsx`)
@@ -305,11 +311,24 @@ Located in `test-app/`. Uses SQLite for local development.
 
 ## Common Gotchas
 
-### 1. Missing UI Components
+### 1. Missing UI Components (Most Common Issue)
 
-**Symptom**: Notes icon renders but doesn't open panel
-**Cause**: Missing `@radix-ui/react-popover` or `@radix-ui/react-dialog`
-**Fix**: Install appropriate UI library based on `panel_style`
+**Symptom**: Notes icon renders but clicking shows "Notes unavailable - pass popover_components prop" tooltip
+**Cause**: The `popover_components` or `sheet_components` prop was not passed to `HazoNotesIcon`. The component cannot auto-import UI components across package boundaries.
+**Fix**: Pass the UI components explicitly:
+
+```tsx
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+
+const popover_components = { Popover, PopoverTrigger, PopoverContent };
+
+<HazoNotesIcon
+  ref_id="my-notes"
+  popover_components={popover_components}  // Required!
+/>
+```
+
+Also ensure `@radix-ui/react-popover` (for popover) or `@radix-ui/react-dialog` (for slide_panel) is installed.
 
 ### 2. User Shows as "Unknown User"
 

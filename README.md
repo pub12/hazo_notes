@@ -46,8 +46,15 @@ npm install hazo_connect hazo_auth hazo_logs
 
 ### 1. Add the Component
 
+**Important:** You must pass your UI components via the `popover_components` or `sheet_components` prop. The component cannot auto-import these across package boundaries.
+
 ```tsx
 import { HazoNotesIcon } from 'hazo_notes';
+// Import your shadcn/ui components
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+
+// Create the components object
+const popover_components = { Popover, PopoverTrigger, PopoverContent };
 
 function MyComponent() {
   return (
@@ -56,6 +63,7 @@ function MyComponent() {
       <HazoNotesIcon
         ref_id="customer-info-section"
         label="Customer Information"
+        popover_components={popover_components}
       />
     </div>
   );
@@ -148,6 +156,9 @@ For detailed setup instructions, see [SETUP_CHECKLIST.md](./SETUP_CHECKLIST.md).
 
 ```tsx
 import { HazoNotesIcon } from 'hazo_notes';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+
+const popover_components = { Popover, PopoverTrigger, PopoverContent };
 
 export default function FormPage() {
   return (
@@ -157,6 +168,7 @@ export default function FormPage() {
         <HazoNotesIcon
           ref_id="income-field"
           label="Annual Income"
+          popover_components={popover_components}
         />
       </div>
       <input type="number" name="income" />
@@ -177,6 +189,7 @@ export default function FormPage() {
   max_files_per_note={5}
   allowed_file_types={['pdf', 'docx', 'png', 'jpg']}
   max_file_size_mb={10}
+  popover_components={popover_components}
 />
 ```
 
@@ -188,10 +201,15 @@ export default function FormPage() {
 ### Slide Panel Style
 
 ```tsx
+import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
+
+const sheet_components = { Sheet, SheetTrigger, SheetContent };
+
 <HazoNotesIcon
   ref_id="detailed-notes"
   label="Detailed Notes"
   panel_style="slide_panel"
+  sheet_components={sheet_components}
 />
 ```
 
@@ -204,6 +222,7 @@ export default function FormPage() {
   ref_id="quick-notes"
   label="Quick Notes"
   save_mode="auto"
+  popover_components={popover_components}
 />
 ```
 
@@ -217,6 +236,7 @@ export default function FormPage() {
   label="Styled Notes"
   background_color="bg-blue-50"
   className="ml-2"
+  popover_components={popover_components}
 />
 ```
 
@@ -228,6 +248,9 @@ export default function FormPage() {
 import { useState } from 'react';
 import { HazoNotesIcon } from 'hazo_notes';
 import type { NoteEntry } from 'hazo_notes/types';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+
+const popover_components = { Popover, PopoverTrigger, PopoverContent };
 
 export default function ControlledExample() {
   const [notes, setNotes] = useState<NoteEntry[]>([]);
@@ -238,6 +261,7 @@ export default function ControlledExample() {
       label="Controlled Notes"
       notes={notes}
       on_notes_change={setNotes}
+      popover_components={popover_components}
     />
   );
 }
@@ -290,6 +314,18 @@ logfile = logs/hazo_notes.log
 interface HazoNotesIconProps {
   // Required
   ref_id: string;                      // Unique identifier for this notes instance
+
+  // UI Components (REQUIRED - must pass one based on panel_style)
+  popover_components?: {               // Required for panel_style="popover" (default)
+    Popover: React.ComponentType<any>;
+    PopoverTrigger: React.ComponentType<any>;
+    PopoverContent: React.ComponentType<any>;
+  };
+  sheet_components?: {                 // Required for panel_style="slide_panel"
+    Sheet: React.ComponentType<any>;
+    SheetTrigger: React.ComponentType<any>;
+    SheetContent: React.ComponentType<any>;
+  };
 
   // Display
   label?: string;                      // Panel header label
@@ -567,9 +603,37 @@ Each note entry in the JSONB array:
 
 ### Notes icon doesn't open panel
 
-**Problem**: Icon renders but clicking does nothing.
+**Problem**: Icon renders but clicking shows "Notes unavailable - pass popover_components prop" tooltip.
 
-**Solution**: Install required UI components:
+**Cause**: The component cannot auto-import UI components across package boundaries.
+
+**Solution**: You must explicitly pass the UI components prop:
+
+```tsx
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+
+const popover_components = { Popover, PopoverTrigger, PopoverContent };
+
+<HazoNotesIcon
+  ref_id="my-notes"
+  popover_components={popover_components}  // Required!
+/>
+```
+
+For slide panel style, use `sheet_components` instead:
+```tsx
+import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
+
+const sheet_components = { Sheet, SheetTrigger, SheetContent };
+
+<HazoNotesIcon
+  ref_id="my-notes"
+  panel_style="slide_panel"
+  sheet_components={sheet_components}
+/>
+```
+
+Make sure you also have the required dependencies:
 ```bash
 npm install @radix-ui/react-popover @radix-ui/react-dialog
 ```

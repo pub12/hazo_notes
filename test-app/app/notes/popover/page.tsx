@@ -1,6 +1,9 @@
 "use client";
 
 import { HazoNotesIcon } from "hazo_notes";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+
+const popover_components = { Popover, PopoverTrigger, PopoverContent };
 
 export default function PopoverStylePage() {
   return (
@@ -24,6 +27,7 @@ export default function PopoverStylePage() {
               label="Yellow Theme"
               panel_style="popover"
               background_color="bg-yellow-100"
+              popover_components={popover_components}
             />
           </div>
         </div>
@@ -41,6 +45,7 @@ export default function PopoverStylePage() {
               label="Blue Theme"
               panel_style="popover"
               background_color="bg-blue-50"
+              popover_components={popover_components}
             />
           </div>
         </div>
@@ -58,6 +63,7 @@ export default function PopoverStylePage() {
               label="Green Theme"
               panel_style="popover"
               background_color="bg-green-50"
+              popover_components={popover_components}
             />
           </div>
         </div>
@@ -75,6 +81,7 @@ export default function PopoverStylePage() {
               label="Gray Theme"
               panel_style="popover"
               background_color="bg-gray-100"
+              popover_components={popover_components}
             />
           </div>
         </div>

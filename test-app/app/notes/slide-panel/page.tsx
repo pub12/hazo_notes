@@ -1,6 +1,9 @@
 "use client";
 
 import { HazoNotesIcon } from "hazo_notes";
+import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
+
+const sheet_components = { Sheet, SheetTrigger, SheetContent };
 
 export default function SlidePanelPage() {
   return (
@@ -22,6 +25,7 @@ export default function SlidePanelPage() {
             ref_id="slide-panel-doc"
             label="Document Review"
             panel_style="slide_panel"
+            sheet_components={sheet_components}
           />
         </div>
         <div className="h-32 bg-muted rounded flex items-center justify-center text-muted-foreground">
@@ -42,6 +46,7 @@ export default function SlidePanelPage() {
             label="Task Comments"
             panel_style="slide_panel"
             background_color="bg-blue-50"
+            sheet_components={sheet_components}
           />
         </div>
         <div className="h-32 bg-muted rounded flex items-center justify-center text-muted-foreground">

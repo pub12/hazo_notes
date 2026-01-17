@@ -215,8 +215,15 @@ logfile = logs/hazo_notes.log
 
 ### 8. Add the HazoNotesIcon component
 
+**IMPORTANT:** You must pass the UI components via the `popover_components` or `sheet_components` prop. The component cannot auto-import these across package boundaries.
+
 ```tsx
 import { HazoNotesIcon } from 'hazo_notes';
+// Import your shadcn/ui popover components
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+
+// Create the components object once
+const popover_components = { Popover, PopoverTrigger, PopoverContent };
 
 function MyComponent() {
   return (
@@ -225,10 +232,25 @@ function MyComponent() {
       <HazoNotesIcon
         ref_id="customer-info-section"
         label="Customer Information"
+        popover_components={popover_components}  // Required!
       />
     </div>
   );
 }
+```
+
+For slide panel style, import Sheet components instead:
+
+```tsx
+import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
+
+const sheet_components = { Sheet, SheetTrigger, SheetContent };
+
+<HazoNotesIcon
+  ref_id="field-id"
+  panel_style="slide_panel"
+  sheet_components={sheet_components}  // Required for slide_panel!
+/>
 ```
 
 ### 9. (Optional) Configure component props
@@ -239,6 +261,7 @@ You can override config file settings via component props:
 <HazoNotesIcon
   ref_id="field-123"
   label="Customer Notes"
+  popover_components={popover_components}  // Required!
 
   // UI configuration overrides
   panel_style="slide_panel"      // 'popover' | 'slide_panel'
@@ -394,10 +417,26 @@ After setup, verify everything works:
 - Verify `@radix-ui/react-popover` or `@radix-ui/react-dialog` is installed
 - Check browser console for import errors
 
-### Notes icon doesn't open panel
-- Verify UI components are installed: `npm install @radix-ui/react-popover @radix-ui/react-dialog`
-- Check that the component matches `panel_style` (popover uses `react-popover`, slide_panel uses `react-dialog`)
-- Look for errors in browser console
+### Notes icon doesn't open panel (shows "Notes unavailable" tooltip)
+This is the most common issue. The component cannot auto-import UI components across package boundaries.
+
+**Solution:** Pass the UI components via the `popover_components` or `sheet_components` prop:
+
+```tsx
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+
+const popover_components = { Popover, PopoverTrigger, PopoverContent };
+
+<HazoNotesIcon
+  ref_id="my-notes"
+  popover_components={popover_components}  // This is required!
+/>
+```
+
+Also verify:
+- UI components are installed: `npm install @radix-ui/react-popover @radix-ui/react-dialog`
+- You have shadcn/ui components at `@/components/ui/popover` (or your equivalent path)
+- For slide_panel style, use `sheet_components` with Sheet components instead
 
 ### Notes not saving
 - Check that `getUserIdFromRequest` returns a valid user ID

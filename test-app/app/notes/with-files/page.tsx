@@ -1,6 +1,9 @@
 "use client";
 
 import { HazoNotesIcon } from "hazo_notes";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+
+const popover_components = { Popover, PopoverTrigger, PopoverContent };
 
 export default function WithFilesPage() {
   return (
@@ -26,6 +29,7 @@ export default function WithFilesPage() {
             max_files_per_note={5}
             allowed_file_types={["png", "jpg", "jpeg", "gif", "webp"]}
             max_file_size_mb={10}
+            popover_components={popover_components}
           />
         </div>
         <div className="bg-white rounded p-4 text-sm text-blue-800">
@@ -56,6 +60,7 @@ export default function WithFilesPage() {
             max_files_per_note={5}
             allowed_file_types={["png", "jpg", "jpeg", "gif", "pdf"]}
             max_file_size_mb={10}
+            popover_components={popover_components}
           />
         </div>
         <div className="h-32 bg-muted rounded flex items-center justify-center text-muted-foreground">
@@ -75,6 +80,7 @@ export default function WithFilesPage() {
             ref_id="files-test-disabled"
             label="Files Disabled"
             enable_files={false}
+            popover_components={popover_components}
           />
         </div>
         <div className="h-20 bg-muted rounded flex items-center justify-center text-muted-foreground">

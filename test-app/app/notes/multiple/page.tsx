@@ -1,6 +1,9 @@
 "use client";
 
 import { HazoNotesIcon } from "hazo_notes";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+
+const popover_components = { Popover, PopoverTrigger, PopoverContent };
 
 export default function MultiplePage() {
   const fields = [
@@ -37,6 +40,7 @@ export default function MultiplePage() {
               <HazoNotesIcon
                 ref_id={field.id}
                 label={field.label}
+                popover_components={popover_components}
               />
             </div>
           </div>

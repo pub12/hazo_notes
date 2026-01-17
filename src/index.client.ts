@@ -26,9 +26,6 @@ export type {
   HazoNotesFilePreviewProps,
   NotesApiResponse,
   AddNoteApiResponse,
-  // UI component types for consuming apps
-  PopoverComponents,
-  SheetComponents,
 } from './types/index.js';
 
 // Logger (client-side)

@@ -1,9 +1,6 @@
 "use client";
 
 import { HazoNotesIcon } from "hazo_notes";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-
-const popover_components = { Popover, PopoverTrigger, PopoverContent };
 
 export default function AutoSavePage() {
   return (
@@ -26,7 +23,6 @@ export default function AutoSavePage() {
               ref_id="auto-save-enabled"
               label="Auto-Save Enabled"
               save_mode="auto"
-              popover_components={popover_components}
             />
           </div>
           <p className="text-xs text-muted-foreground">
@@ -46,7 +42,6 @@ export default function AutoSavePage() {
               ref_id="auto-save-disabled"
               label="Explicit Save"
               save_mode="explicit"
-              popover_components={popover_components}
             />
           </div>
           <p className="text-xs text-muted-foreground">

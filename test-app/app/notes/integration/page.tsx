@@ -2,11 +2,6 @@
 
 import { useState } from "react";
 import { HazoNotesIcon, LoggerProvider, type NoteEntry } from "hazo_notes";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
-
-const popover_components = { Popover, PopoverTrigger, PopoverContent };
-const sheet_components = { Sheet, SheetTrigger, SheetContent };
 
 // Simple console logger for testing
 const testLogger = {
@@ -52,7 +47,6 @@ export default function IntegrationPage() {
               enable_files={true}
               on_open={() => console.log("Panel opened")}
               on_close={() => console.log("Panel closed")}
-              popover_components={popover_components}
             />
           </div>
         </div>
@@ -78,7 +72,6 @@ export default function IntegrationPage() {
                 name: "Current User",
                 email: "current@example.com",
               }}
-              popover_components={popover_components}
             />
           </div>
 
@@ -105,7 +98,6 @@ export default function IntegrationPage() {
               panel_style="slide_panel"
               save_mode="auto"
               background_color="bg-blue-50"
-              sheet_components={sheet_components}
             />
           </div>
         </div>

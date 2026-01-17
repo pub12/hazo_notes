@@ -1,10 +1,6 @@
 "use client";
 
 import { HazoNotesIcon } from "hazo_notes";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-
-// UI components must be passed to HazoNotesIcon since dynamic imports don't work across package boundaries
-const popover_components = { Popover, PopoverTrigger, PopoverContent };
 
 export default function BasicNotesPage() {
   return (
@@ -25,7 +21,6 @@ export default function BasicNotesPage() {
           <HazoNotesIcon
             ref_id="basic-test-income"
             label="Income Section"
-            popover_components={popover_components}
           />
         </div>
         <div className="h-20 bg-muted rounded flex items-center justify-center text-muted-foreground">
@@ -44,7 +39,6 @@ export default function BasicNotesPage() {
           <HazoNotesIcon
             ref_id="basic-test-expenses"
             label="Expenses Section"
-            popover_components={popover_components}
           />
         </div>
         <div className="h-20 bg-muted rounded flex items-center justify-center text-muted-foreground">

@@ -23,7 +23,7 @@ The package uses modular exports to separate client and server code:
 
 ```
 HazoNotesIcon (main entry)
-├── Popover/Sheet (UI container, dynamically loaded)
+├── Popover/Sheet (Radix UI, bundled)
 │   └── HazoNotesPanel (panel content)
 │       ├── HazoNotesEntry[] (note display)
 │       │   ├── ProfileStamp (user avatar, optional)
@@ -36,30 +36,25 @@ HazoNotesIcon (main entry)
 **HazoNotesIcon** (`src/components/hazo_notes_icon.tsx`)
 - Main trigger button that opens the notes panel
 - Supports both controlled and uncontrolled modes
-- **IMPORTANT**: Requires `popover_components` or `sheet_components` prop - cannot auto-import across package boundaries
+- Uses bundled Radix UI primitives - no additional UI component setup required
 - Shows visual indicator (amber background) when notes exist
 - Auto-fetches user info from `/api/hazo_auth/me` if not provided
 - Configurable icon size and border visibility
 
 Key props:
-- `popover_components`: **Required for popover style** - `{ Popover, PopoverTrigger, PopoverContent }` from your UI library
-- `sheet_components`: **Required for slide_panel style** - `{ Sheet, SheetTrigger, SheetContent }` from your UI library
-- `icon_size`: Button size in pixels (default: 28). The inner icon scales proportionally (~57% of button size, so 28px → 16px inner icon). This matches the standard h-7/w-7 button with h-4/w-4 icon pattern used across hazo packages.
-- `show_border`: Whether to display a border around the button (default: true). When false, renders a borderless icon suitable for inline or toolbar usage.
+- `panel_style`: `'popover'` (default) or `'slide_panel'` - controls how the notes panel is displayed
+- `icon_size`: Button size in pixels (default: 28). The inner icon scales proportionally (~57% of button size, so 28px -> 16px inner icon). This matches the standard h-7/w-7 button with h-4/w-4 icon pattern used across hazo packages.
+- `show_border`: Whether to display a border around the icon button (default: true). When false, renders a borderless icon suitable for inline or toolbar usage.
 
 ```tsx
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-
-const popover_components = { Popover, PopoverTrigger, PopoverContent };
-
-// Default 28px button with border
-<HazoNotesIcon ref_id="123" popover_components={popover_components} />
+// Default 28px button with border (popover style)
+<HazoNotesIcon ref_id="123" />
 
 // Compact 24px button without border
-<HazoNotesIcon ref_id="123" icon_size={24} show_border={false} popover_components={popover_components} />
+<HazoNotesIcon ref_id="123" icon_size={24} show_border={false} />
 
-// Large 36px button with border
-<HazoNotesIcon ref_id="123" icon_size={36} popover_components={popover_components} />
+// Large 36px button with border, slide panel style
+<HazoNotesIcon ref_id="123" icon_size={36} panel_style="slide_panel" />
 ```
 
 **HazoNotesPanel** (`src/components/hazo_notes_panel.tsx`)
@@ -178,16 +173,9 @@ Config file: `config/hazo_notes_config.ini`
 
 ## Key Design Patterns
 
-### 1. Dynamic UI Component Loading
+### 1. Bundled Radix UI Primitives
 
-The package dynamically imports shadcn/ui components to avoid hard dependencies:
-
-```typescript
-// Popover components loaded at runtime
-const popoverModule = await import('@/components/ui/popover');
-```
-
-This allows the package to work with different UI libraries or custom implementations.
+The package includes `@radix-ui/react-popover` and `@radix-ui/react-dialog` as direct dependencies, with an internal Sheet component (`src/components/internal/sheet.tsx`) for slide panel mode. This eliminates the need for consumers to configure UI components.
 
 ### 2. Factory Pattern for API Handlers
 
@@ -268,7 +256,9 @@ cd test-app && npm run init-db
 
 ## Dependencies
 
-### Required
+### Required (bundled)
+- `@radix-ui/react-popover` - Popover primitive for notes panel
+- `@radix-ui/react-dialog` - Dialog primitive for slide panel mode
 - `hazo_config` - INI configuration management
 - `clsx` - Class name utilities
 - `tailwind-merge` - Tailwind class merging
@@ -277,8 +267,6 @@ cd test-app && npm run init-db
 ### Peer Dependencies
 - `react` ^18.0.0
 - `next` >=14.0.0
-- `@radix-ui/react-popover` ^1.0.0 (for popover style)
-- `@radix-ui/react-dialog` ^1.0.0 (for slide panel style)
 - `react-icons` ^5.0.0 (for file type icons)
 - `tailwindcss` >=3.0.0
 
@@ -311,50 +299,31 @@ Located in `test-app/`. Uses SQLite for local development.
 
 ## Common Gotchas
 
-### 1. Missing UI Components (Most Common Issue)
-
-**Symptom**: Notes icon renders but clicking shows "Notes unavailable - pass popover_components prop" tooltip
-**Cause**: The `popover_components` or `sheet_components` prop was not passed to `HazoNotesIcon`. The component cannot auto-import UI components across package boundaries.
-**Fix**: Pass the UI components explicitly:
-
-```tsx
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-
-const popover_components = { Popover, PopoverTrigger, PopoverContent };
-
-<HazoNotesIcon
-  ref_id="my-notes"
-  popover_components={popover_components}  // Required!
-/>
-```
-
-Also ensure `@radix-ui/react-popover` (for popover) or `@radix-ui/react-dialog` (for slide_panel) is installed.
-
-### 2. User Shows as "Unknown User"
+### 1. User Shows as "Unknown User"
 
 **Symptom**: Notes display but no user names
 **Cause**: `getUserProfile` not implemented in API handler
 **Fix**: Implement profile lookup in `createNotesHandler` options
 
-### 3. Files Not Uploading
+### 2. Files Not Uploading
 
 **Symptom**: File upload fails silently
 **Cause**: Missing files API route or incorrect storage mode
 **Fix**: Create `/api/hazo_notes/files/upload/route.ts` or use `jsonb` mode
 
-### 4. Notes Not Persisting
+### 3. Notes Not Persisting
 
 **Symptom**: Notes disappear on refresh
 **Cause**: Missing database table or incorrect `ref_id`
 **Fix**: Run migration script, verify `ref_id` is consistent
 
-### 5. Config Not Loading
+### 4. Config Not Loading
 
 **Symptom**: Default values used despite config file
 **Cause**: Config file in wrong location
 **Fix**: Place `hazo_notes_config.ini` in `config/` at app root
 
-### 6. Authentication Errors
+### 5. Authentication Errors
 
 **Symptom**: "Unauthorized" when adding notes
 **Cause**: `getUserIdFromRequest` returns null

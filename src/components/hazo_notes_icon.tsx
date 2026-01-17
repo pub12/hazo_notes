@@ -8,10 +8,12 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import type { HazoNotesIconProps, NoteUserInfo, NoteEntry, NewNoteInput, PopoverComponents, SheetComponents } from '../types/index.js';
+import * as Popover from '@radix-ui/react-popover';
+import type { HazoNotesIconProps, NoteUserInfo, NoteEntry, NewNoteInput } from '../types/index.js';
 import { cn } from '../utils/cn.js';
 import { use_logger } from '../logger/context.js';
 import { use_notes } from '../hooks/use_notes.js';
+import { Sheet, SheetTrigger, SheetContent } from './internal/sheet.js';
 
 // Default IoDocumentText icon (inline SVG to avoid hard dependency on react-icons)
 function DocumentIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
@@ -45,8 +47,6 @@ export function HazoNotesIcon({
   panel_style,
   save_mode,
   background_color,
-  popover_components: injected_popover,
-  sheet_components: injected_sheet,
   enable_files = true,
   max_files_per_note = 5,
   allowed_file_types = ['pdf', 'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx'],
@@ -66,15 +66,6 @@ export function HazoNotesIcon({
   const effective_background_color = background_color ?? 'bg-yellow-100';
   const [is_open, set_is_open] = useState(false);
   const [fetched_user, set_fetched_user] = useState<NoteUserInfo | null>(null);
-
-  // Dynamic UI components - use injected props if provided, otherwise try dynamic import
-  const [PopoverComponentsState, setPopoverComponents] = useState<PopoverComponents | null>(
-    injected_popover || null
-  );
-
-  const [SheetComponentsState, setSheetComponents] = useState<SheetComponents | null>(
-    injected_sheet || null
-  );
 
   const [ProfileStampComponent, setProfileStampComponent] = useState<React.ComponentType<any> | null>(null);
   const [HazoNotesPanelComponent, setHazoNotesPanelComponent] = useState<React.ComponentType<any> | null>(null);
@@ -122,66 +113,6 @@ export function HazoNotesIcon({
       fetch_user();
     }
   }, [current_user, logger]);
-
-  // Update state if injected props change
-  useEffect(() => {
-    if (injected_popover) {
-      setPopoverComponents(injected_popover);
-    }
-  }, [injected_popover]);
-
-  useEffect(() => {
-    if (injected_sheet) {
-      setSheetComponents(injected_sheet);
-    }
-  }, [injected_sheet]);
-
-  // Attempt dynamic import only if no injected components provided
-  // Note: This fallback may not work in all consuming app configurations
-  useEffect(() => {
-    if (effective_panel_style === 'popover' && !injected_popover && !PopoverComponentsState) {
-      const loadComponents = async () => {
-        try {
-          // Use variable to prevent webpack from resolving at build time
-          const popoverPath = '@/components/ui/popover';
-          const popoverModule = await import(/* webpackIgnore: true */ popoverPath).catch(() => null) as Record<string, unknown> | null;
-          if (popoverModule?.Popover) {
-            setPopoverComponents({
-              Popover: popoverModule.Popover as React.ComponentType<any>,
-              PopoverTrigger: popoverModule.PopoverTrigger as React.ComponentType<any>,
-              PopoverContent: popoverModule.PopoverContent as React.ComponentType<any>,
-            });
-          }
-        } catch {
-          logger.debug('[HazoNotesIcon] Popover components not available - pass popover_components prop');
-        }
-      };
-      loadComponents();
-    }
-  }, [effective_panel_style, injected_popover, PopoverComponentsState, logger]);
-
-  // Attempt dynamic import for Sheet only if no injected components provided
-  useEffect(() => {
-    if (effective_panel_style === 'slide_panel' && !injected_sheet && !SheetComponentsState) {
-      const loadComponents = async () => {
-        try {
-          // Use variable to prevent webpack from resolving at build time
-          const sheetPath = '@/components/ui/sheet';
-          const sheetModule = await import(/* webpackIgnore: true */ sheetPath).catch(() => null) as Record<string, unknown> | null;
-          if (sheetModule?.Sheet) {
-            setSheetComponents({
-              Sheet: sheetModule.Sheet as React.ComponentType<any>,
-              SheetTrigger: sheetModule.SheetTrigger as React.ComponentType<any>,
-              SheetContent: sheetModule.SheetContent as React.ComponentType<any>,
-            });
-          }
-        } catch {
-          logger.debug('[HazoNotesIcon] Sheet components not available - pass sheet_components prop');
-        }
-      };
-      loadComponents();
-    }
-  }, [effective_panel_style, injected_sheet, SheetComponentsState, logger]);
 
   // Load ProfileStamp from hazo_auth
   useEffect(() => {
@@ -290,35 +221,43 @@ export function HazoNotesIcon({
   };
 
   // Render with popover
-  if (effective_panel_style === 'popover' && PopoverComponentsState) {
-    const { Popover, PopoverTrigger, PopoverContent } = PopoverComponentsState;
+  if (effective_panel_style === 'popover') {
     return (
       <div className="cls_hazo_notes_icon_wrapper">
-        <Popover open={is_open} onOpenChange={handle_open_change}>
-          <PopoverTrigger asChild>{trigger_button}</PopoverTrigger>
-          <PopoverContent
-            className="w-80 p-0"
-            align="end"
-            side="bottom"
-            sideOffset={5}
-            collisionPadding={16}
-            avoidCollisions={true}
-          >
-            {HazoNotesPanelComponent && <HazoNotesPanelComponent {...panel_props} />}
-          </PopoverContent>
-        </Popover>
+        <Popover.Root open={is_open} onOpenChange={handle_open_change}>
+          <Popover.Trigger asChild>{trigger_button}</Popover.Trigger>
+          <Popover.Portal>
+            <Popover.Content
+              className="cls_hazo_notes_popover_content"
+              style={{
+                width: '320px',
+                padding: 0,
+                backgroundColor: 'white',
+                borderRadius: '8px',
+                boxShadow: '0 10px 38px -10px rgba(22,23,24,0.35), 0 10px 20px -15px rgba(22,23,24,0.2)',
+                zIndex: 50,
+              }}
+              align="end"
+              side="bottom"
+              sideOffset={5}
+              collisionPadding={16}
+              avoidCollisions={true}
+            >
+              {HazoNotesPanelComponent && <HazoNotesPanelComponent {...panel_props} />}
+            </Popover.Content>
+          </Popover.Portal>
+        </Popover.Root>
       </div>
     );
   }
 
   // Render with slide panel (sheet)
-  if (effective_panel_style === 'slide_panel' && SheetComponentsState) {
-    const { Sheet, SheetTrigger, SheetContent } = SheetComponentsState;
+  if (effective_panel_style === 'slide_panel') {
     return (
       <div className="cls_hazo_notes_icon_wrapper">
         <Sheet open={is_open} onOpenChange={handle_open_change}>
           <SheetTrigger asChild>{trigger_button}</SheetTrigger>
-          <SheetContent className="w-96 p-0 sm:max-w-md">
+          <SheetContent>
             {HazoNotesPanelComponent && <HazoNotesPanelComponent {...panel_props} />}
           </SheetContent>
         </Sheet>
@@ -326,21 +265,10 @@ export function HazoNotesIcon({
     );
   }
 
-  // Fallback when components not loaded - still clickable but shows tooltip
+  // Fallback (should not reach here with valid panel_style)
   return (
     <div className="cls_hazo_notes_icon_wrapper">
-      {React.cloneElement(trigger_button, {
-        onClick: () => {
-          logger.warn(
-            `[HazoNotesIcon] UI components not loaded. Pass ${
-              effective_panel_style === 'popover' ? 'popover_components' : 'sheet_components'
-            } prop with your shadcn/ui components.`
-          );
-        },
-        title: effective_panel_style === 'popover'
-          ? 'Notes unavailable - pass popover_components prop'
-          : 'Notes unavailable - pass sheet_components prop',
-      })}
+      {trigger_button}
     </div>
   );
 }

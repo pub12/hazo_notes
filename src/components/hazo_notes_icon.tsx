@@ -42,9 +42,9 @@ export function HazoNotesIcon({
   notes: controlled_notes,
   on_notes_change,
   current_user,
-  panel_style = 'popover',
-  save_mode = 'explicit',
-  background_color = 'bg-yellow-100',
+  panel_style,
+  save_mode,
+  background_color,
   popover_components: injected_popover,
   sheet_components: injected_sheet,
   enable_files = true,
@@ -59,6 +59,11 @@ export function HazoNotesIcon({
   show_border = true,
 }: HazoNotesIconProps) {
   const logger = use_logger();
+
+  // Apply defaults with nullish coalescing - handles explicit undefined from wrapper components
+  const effective_panel_style = panel_style ?? 'popover';
+  const effective_save_mode = save_mode ?? 'explicit';
+  const effective_background_color = background_color ?? 'bg-yellow-100';
   const [is_open, set_is_open] = useState(false);
   const [fetched_user, set_fetched_user] = useState<NoteUserInfo | null>(null);
 
@@ -134,7 +139,7 @@ export function HazoNotesIcon({
   // Attempt dynamic import only if no injected components provided
   // Note: This fallback may not work in all consuming app configurations
   useEffect(() => {
-    if (panel_style === 'popover' && !injected_popover && !PopoverComponentsState) {
+    if (effective_panel_style === 'popover' && !injected_popover && !PopoverComponentsState) {
       const loadComponents = async () => {
         try {
           // Use variable to prevent webpack from resolving at build time
@@ -153,11 +158,11 @@ export function HazoNotesIcon({
       };
       loadComponents();
     }
-  }, [panel_style, injected_popover, PopoverComponentsState, logger]);
+  }, [effective_panel_style, injected_popover, PopoverComponentsState, logger]);
 
   // Attempt dynamic import for Sheet only if no injected components provided
   useEffect(() => {
-    if (panel_style === 'slide_panel' && !injected_sheet && !SheetComponentsState) {
+    if (effective_panel_style === 'slide_panel' && !injected_sheet && !SheetComponentsState) {
       const loadComponents = async () => {
         try {
           // Use variable to prevent webpack from resolving at build time
@@ -176,7 +181,7 @@ export function HazoNotesIcon({
       };
       loadComponents();
     }
-  }, [panel_style, injected_sheet, SheetComponentsState, logger]);
+  }, [effective_panel_style, injected_sheet, SheetComponentsState, logger]);
 
   // Load ProfileStamp from hazo_auth
   useEffect(() => {
@@ -273,8 +278,8 @@ export function HazoNotesIcon({
     on_add_note: handle_add_note,
     on_close: () => handle_open_change(false),
     current_user: effective_user,
-    save_mode,
-    background_color,
+    save_mode: effective_save_mode,
+    background_color: effective_background_color,
     loading,
     error,
     enable_files,
@@ -285,7 +290,7 @@ export function HazoNotesIcon({
   };
 
   // Render with popover
-  if (panel_style === 'popover' && PopoverComponentsState) {
+  if (effective_panel_style === 'popover' && PopoverComponentsState) {
     const { Popover, PopoverTrigger, PopoverContent } = PopoverComponentsState;
     return (
       <div className="cls_hazo_notes_icon_wrapper">
@@ -307,7 +312,7 @@ export function HazoNotesIcon({
   }
 
   // Render with slide panel (sheet)
-  if (panel_style === 'slide_panel' && SheetComponentsState) {
+  if (effective_panel_style === 'slide_panel' && SheetComponentsState) {
     const { Sheet, SheetTrigger, SheetContent } = SheetComponentsState;
     return (
       <div className="cls_hazo_notes_icon_wrapper">
@@ -328,11 +333,11 @@ export function HazoNotesIcon({
         onClick: () => {
           logger.warn(
             `[HazoNotesIcon] UI components not loaded. Pass ${
-              panel_style === 'popover' ? 'popover_components' : 'sheet_components'
+              effective_panel_style === 'popover' ? 'popover_components' : 'sheet_components'
             } prop with your shadcn/ui components.`
           );
         },
-        title: panel_style === 'popover'
+        title: effective_panel_style === 'popover'
           ? 'Notes unavailable - pass popover_components prop'
           : 'Notes unavailable - pass sheet_components prop',
       })}

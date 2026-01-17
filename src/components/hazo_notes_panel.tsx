@@ -60,6 +60,10 @@ export function HazoNotesPanel({
   max_file_size_mb = 10,
   ProfileStampComponent,
 }: HazoNotesPanelProps) {
+  // Apply defaults with nullish coalescing - handles explicit undefined from wrapper components
+  const effective_save_mode = save_mode ?? 'explicit';
+  const effective_background_color = background_color ?? 'bg-yellow-100';
+
   const [new_note_text, set_new_note_text] = useState('');
   const [is_saving, set_is_saving] = useState(false);
   const file_input_ref = useRef<HTMLInputElement>(null);
@@ -110,7 +114,7 @@ export function HazoNotesPanel({
 
   // Handle auto-save on blur (if enabled)
   const handle_blur = () => {
-    if (save_mode === 'auto' && (new_note_text.trim() || pending_files.length > 0)) {
+    if (effective_save_mode === 'auto' && (new_note_text.trim() || pending_files.length > 0)) {
       handle_save();
     }
   };
@@ -211,20 +215,18 @@ export function HazoNotesPanel({
 
   // Derive a darker shade class for the header based on background_color
   const get_header_class = () => {
-    if (!background_color) return 'bg-yellow-200';
     // Extract color name and make it darker (e.g., bg-green-50 -> bg-green-200)
-    const match = background_color.match(/bg-(\w+)-(\d+)/);
+    const match = effective_background_color.match(/bg-(\w+)-(\d+)/);
     if (match) {
       const [, color] = match;
       return `bg-${color}-200`;
     }
-    return background_color;
+    return effective_background_color;
   };
 
   // Get text color class based on background
   const get_text_class = () => {
-    if (!background_color) return { primary: 'text-yellow-900', secondary: 'text-yellow-700' };
-    const match = background_color.match(/bg-(\w+)-/);
+    const match = effective_background_color.match(/bg-(\w+)-/);
     if (match) {
       const [, color] = match;
       return { primary: `text-${color}-900`, secondary: `text-${color}-700` };
@@ -234,8 +236,7 @@ export function HazoNotesPanel({
 
   // Get border color class based on background
   const get_border_class = () => {
-    if (!background_color) return 'border-yellow-300';
-    const match = background_color.match(/bg-(\w+)-/);
+    const match = effective_background_color.match(/bg-(\w+)-/);
     if (match) {
       const [, color] = match;
       return `border-${color}-300`;
@@ -248,7 +249,7 @@ export function HazoNotesPanel({
   const border_class = get_border_class();
 
   return (
-    <div className={cn('cls_hazo_notes_panel flex flex-col max-h-[500px]', background_color)}>
+    <div className={cn('cls_hazo_notes_panel flex flex-col max-h-[500px]', effective_background_color)}>
       {/* Header - sticky note style */}
       <div className={cn('cls_hazo_notes_panel_header px-4 py-3 border-b flex-shrink-0', header_class, border_class)}>
         <h4 className={cn('font-medium text-sm', text_class.primary)}>{label}</h4>
@@ -273,7 +274,7 @@ export function HazoNotesPanel({
 
       {/* Existing notes (scrollable area) */}
       {!loading && (
-        <div className={cn('cls_hazo_notes_list flex-1 overflow-y-auto min-h-0', background_color || 'bg-yellow-50')}>
+        <div className={cn('cls_hazo_notes_list flex-1 overflow-y-auto min-h-0', effective_background_color)}>
           {notes.length === 0 ? (
             <div className={cn('px-4 py-6 text-center text-sm', text_class.secondary)}>
               No notes yet.
@@ -293,7 +294,7 @@ export function HazoNotesPanel({
       )}
 
       {/* New note textarea */}
-      <div className={cn('cls_hazo_notes_new_note border-t px-4 py-3 flex-shrink-0', border_class, background_color)}>
+      <div className={cn('cls_hazo_notes_new_note border-t px-4 py-3 flex-shrink-0', border_class, effective_background_color)}>
         <div className="flex items-center gap-2 mb-2">
           {current_user && render_current_user_avatar()}
           <label className={cn('text-xs font-medium', text_class.primary)}>
@@ -373,7 +374,7 @@ export function HazoNotesPanel({
             )}
 
             {/* Save button (explicit mode) */}
-            {save_mode === 'explicit' && (
+            {effective_save_mode === 'explicit' && (
               <button
                 type="button"
                 onClick={handle_save}

@@ -53,6 +53,9 @@ export function HazoNotesIcon({
   max_file_size_mb = 10,
   on_open,
   on_close,
+  open: controlled_open,
+  onOpenChange: controlled_onOpenChange,
+  default_open = false,
   disabled,
   className,
   icon_size = 28,
@@ -64,7 +67,12 @@ export function HazoNotesIcon({
   const effective_panel_style = panel_style ?? 'popover';
   const effective_save_mode = save_mode ?? 'explicit';
   const effective_background_color = background_color ?? 'bg-yellow-100';
-  const [is_open, set_is_open] = useState(false);
+
+  // Controlled open state support
+  const [internal_open, set_internal_open] = useState(default_open);
+  const is_controlled_open = controlled_open !== undefined;
+  const is_open = is_controlled_open ? controlled_open : internal_open;
+
   const [fetched_user, set_fetched_user] = useState<NoteUserInfo | null>(null);
 
   const [ProfileStampComponent, setProfileStampComponent] = useState<React.ComponentType<any> | null>(null);
@@ -143,7 +151,11 @@ export function HazoNotesIcon({
 
   // Handle open/close
   const handle_open_change = (open: boolean) => {
-    set_is_open(open);
+    if (is_controlled_open) {
+      controlled_onOpenChange?.(open);
+    } else {
+      set_internal_open(open);
+    }
     if (open) {
       on_open?.();
     } else {

@@ -166,6 +166,14 @@ export interface HazoNotesIconProps {
   /** Called when panel closes */
   on_close?: () => void;
 
+  // Controlled open state
+  /** Controlled open state - when provided, component is in controlled mode */
+  open?: boolean;
+  /** Callback when open state changes (for controlled mode) */
+  onOpenChange?: (open: boolean) => void;
+  /** Initial open state (for uncontrolled mode) */
+  default_open?: boolean;
+
   // Styling
   /** Disable the notes icon */
   disabled?: boolean;

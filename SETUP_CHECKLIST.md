@@ -21,12 +21,11 @@ npm install hazo_notes
 ### 2. Install peer dependencies (if not already installed)
 
 ```bash
-# Required UI components
-npm install @radix-ui/react-popover @radix-ui/react-dialog react-icons
-
 # Optional but recommended
-npm install hazo_connect hazo_auth hazo_logs
+npm install hazo_connect hazo_auth hazo_logs react-icons
 ```
+
+**Note:** Radix UI primitives (`@radix-ui/react-popover` and `@radix-ui/react-dialog`) are bundled with this package. You don't need to install them separately.
 
 ## Database Setup
 
@@ -215,15 +214,10 @@ logfile = logs/hazo_notes.log
 
 ### 8. Add the HazoNotesIcon component
 
-**IMPORTANT:** You must pass the UI components via the `popover_components` or `sheet_components` prop. The component cannot auto-import these across package boundaries.
+The component bundles its own Radix UI primitives, so no additional UI component setup is required.
 
 ```tsx
 import { HazoNotesIcon } from 'hazo_notes';
-// Import your shadcn/ui popover components
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-
-// Create the components object once
-const popover_components = { Popover, PopoverTrigger, PopoverContent };
 
 function MyComponent() {
   return (
@@ -232,24 +226,19 @@ function MyComponent() {
       <HazoNotesIcon
         ref_id="customer-info-section"
         label="Customer Information"
-        popover_components={popover_components}  // Required!
       />
     </div>
   );
 }
 ```
 
-For slide panel style, import Sheet components instead:
+For slide panel style, just set the `panel_style` prop:
 
 ```tsx
-import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
-
-const sheet_components = { Sheet, SheetTrigger, SheetContent };
-
 <HazoNotesIcon
   ref_id="field-id"
+  label="Field Notes"
   panel_style="slide_panel"
-  sheet_components={sheet_components}  // Required for slide_panel!
 />
 ```
 
@@ -261,7 +250,6 @@ You can override config file settings via component props:
 <HazoNotesIcon
   ref_id="field-123"
   label="Customer Notes"
-  popover_components={popover_components}  // Required!
 
   // UI configuration overrides
   panel_style="slide_panel"      // 'popover' | 'slide_panel'
@@ -279,6 +267,8 @@ You can override config file settings via component props:
   on_close={() => console.log('Notes closed')}
 
   // Styling
+  icon_size={24}                 // Button size in pixels
+  show_border={false}            // Hide border for inline usage
   className="ml-2"
 />
 ```
@@ -413,30 +403,22 @@ After setup, verify everything works:
 ## Troubleshooting
 
 ### Notes icon doesn't appear
-- Check that Tailwind CSS is configured
-- Verify `@radix-ui/react-popover` or `@radix-ui/react-dialog` is installed
-- Check browser console for import errors
 
-### Notes icon doesn't open panel (shows "Notes unavailable" tooltip)
-This is the most common issue. The component cannot auto-import UI components across package boundaries.
+**Possible Causes**:
+1. Missing `ref_id` prop - The component requires a valid `ref_id` and will not render without one
+2. `disabled={true}` is set
+3. Tailwind CSS is not configured
 
-**Solution:** Pass the UI components via the `popover_components` or `sheet_components` prop:
-
+**Solution**:
 ```tsx
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-
-const popover_components = { Popover, PopoverTrigger, PopoverContent };
-
+// Check that ref_id is provided and valid
 <HazoNotesIcon
-  ref_id="my-notes"
-  popover_components={popover_components}  // This is required!
+  ref_id="my-field-123"  // Required - must be a non-empty string
+  label="My Notes"
 />
 ```
 
-Also verify:
-- UI components are installed: `npm install @radix-ui/react-popover @radix-ui/react-dialog`
-- You have shadcn/ui components at `@/components/ui/popover` (or your equivalent path)
-- For slide_panel style, use `sheet_components` with Sheet components instead
+In development, a console warning will appear if `ref_id` is missing.
 
 ### Notes not saving
 - Check that `getUserIdFromRequest` returns a valid user ID

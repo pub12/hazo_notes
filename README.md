@@ -35,26 +35,18 @@ npm install hazo_notes
 Install these based on your needs:
 
 ```bash
-# Required for UI components
-npm install @radix-ui/react-popover @radix-ui/react-dialog react-icons
-
 # Recommended for full functionality
-npm install hazo_connect hazo_auth hazo_logs
+npm install hazo_connect hazo_auth hazo_logs react-icons
 ```
+
+**Note:** Radix UI primitives (`@radix-ui/react-popover` and `@radix-ui/react-dialog`) are bundled with this package. You don't need to install them separately.
 
 ## Quick Start
 
 ### 1. Add the Component
 
-**Important:** You must pass your UI components via the `popover_components` or `sheet_components` prop. The component cannot auto-import these across package boundaries.
-
 ```tsx
 import { HazoNotesIcon } from 'hazo_notes';
-// Import your shadcn/ui components
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-
-// Create the components object
-const popover_components = { Popover, PopoverTrigger, PopoverContent };
 
 function MyComponent() {
   return (
@@ -63,12 +55,13 @@ function MyComponent() {
       <HazoNotesIcon
         ref_id="customer-info-section"
         label="Customer Information"
-        popover_components={popover_components}
       />
     </div>
   );
 }
 ```
+
+The component bundles its own Radix UI primitives, so no additional UI component setup is required.
 
 ### 2. Create API Route
 
@@ -156,9 +149,6 @@ For detailed setup instructions, see [SETUP_CHECKLIST.md](./SETUP_CHECKLIST.md).
 
 ```tsx
 import { HazoNotesIcon } from 'hazo_notes';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-
-const popover_components = { Popover, PopoverTrigger, PopoverContent };
 
 export default function FormPage() {
   return (
@@ -168,7 +158,6 @@ export default function FormPage() {
         <HazoNotesIcon
           ref_id="income-field"
           label="Annual Income"
-          popover_components={popover_components}
         />
       </div>
       <input type="number" name="income" />
@@ -189,7 +178,6 @@ export default function FormPage() {
   max_files_per_note={5}
   allowed_file_types={['pdf', 'docx', 'png', 'jpg']}
   max_file_size_mb={10}
-  popover_components={popover_components}
 />
 ```
 
@@ -201,15 +189,10 @@ export default function FormPage() {
 ### Slide Panel Style
 
 ```tsx
-import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
-
-const sheet_components = { Sheet, SheetTrigger, SheetContent };
-
 <HazoNotesIcon
   ref_id="detailed-notes"
   label="Detailed Notes"
   panel_style="slide_panel"
-  sheet_components={sheet_components}
 />
 ```
 
@@ -222,7 +205,6 @@ const sheet_components = { Sheet, SheetTrigger, SheetContent };
   ref_id="quick-notes"
   label="Quick Notes"
   save_mode="auto"
-  popover_components={popover_components}
 />
 ```
 
@@ -235,12 +217,13 @@ const sheet_components = { Sheet, SheetTrigger, SheetContent };
   ref_id="styled-notes"
   label="Styled Notes"
   background_color="bg-blue-50"
+  icon_size={24}
+  show_border={false}
   className="ml-2"
-  popover_components={popover_components}
 />
 ```
 
-### Controlled Mode
+### Controlled Mode (Notes State)
 
 ```tsx
 'use client';
@@ -248,11 +231,8 @@ const sheet_components = { Sheet, SheetTrigger, SheetContent };
 import { useState } from 'react';
 import { HazoNotesIcon } from 'hazo_notes';
 import type { NoteEntry } from 'hazo_notes/types';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
-const popover_components = { Popover, PopoverTrigger, PopoverContent };
-
-export default function ControlledExample() {
+export default function ControlledNotesExample() {
   const [notes, setNotes] = useState<NoteEntry[]>([]);
 
   return (
@@ -261,13 +241,41 @@ export default function ControlledExample() {
       label="Controlled Notes"
       notes={notes}
       on_notes_change={setNotes}
-      popover_components={popover_components}
     />
   );
 }
 ```
 
 **Use Case**: Sync notes with parent component state or external state management.
+
+### Controlled Mode (Open State)
+
+Control when the panel opens/closes programmatically:
+
+```tsx
+'use client';
+
+import { useState } from 'react';
+import { HazoNotesIcon } from 'hazo_notes';
+
+export default function ControlledOpenExample() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <button onClick={() => setIsOpen(true)}>Open Notes</button>
+      <HazoNotesIcon
+        ref_id="controlled-open"
+        label="Controlled Open"
+        open={isOpen}
+        onOpenChange={setIsOpen}
+      />
+    </>
+  );
+}
+```
+
+**Note**: When using controlled open mode, the component applies a small delay (100ms) before opening the panel. This prevents conflicts when opening notes from dropdown menus or other overlays that need to close first.
 
 ## Configuration
 
@@ -315,26 +323,19 @@ interface HazoNotesIconProps {
   // Required
   ref_id: string;                      // Unique identifier for this notes instance
 
-  // UI Components (REQUIRED - must pass one based on panel_style)
-  popover_components?: {               // Required for panel_style="popover" (default)
-    Popover: React.ComponentType<any>;
-    PopoverTrigger: React.ComponentType<any>;
-    PopoverContent: React.ComponentType<any>;
-  };
-  sheet_components?: {                 // Required for panel_style="slide_panel"
-    Sheet: React.ComponentType<any>;
-    SheetTrigger: React.ComponentType<any>;
-    SheetContent: React.ComponentType<any>;
-  };
-
   // Display
-  label?: string;                      // Panel header label
-  has_notes?: boolean;                 // Show indicator when notes exist
-  note_count?: number;                 // Display count badge
+  label?: string;                      // Panel header label (default: 'Notes')
+  has_notes?: boolean;                 // Override indicator when notes exist
+  note_count?: number;                 // Override display count badge
 
-  // Controlled mode
+  // Controlled mode (notes state)
   notes?: NoteEntry[];                 // Controlled notes array
   on_notes_change?: (notes: NoteEntry[]) => void;
+
+  // Controlled mode (open state)
+  open?: boolean;                      // Control panel open state
+  onOpenChange?: (open: boolean) => void;
+  default_open?: boolean;              // Initial open state (uncontrolled)
 
   // User context
   current_user?: NoteUserInfo;         // User info (auto-fetched if not provided)
@@ -345,20 +346,24 @@ interface HazoNotesIconProps {
   background_color?: string;           // Tailwind class
 
   // File options
-  enable_files?: boolean;              // Enable file attachments
-  max_files_per_note?: number;
-  allowed_file_types?: string[];
-  max_file_size_mb?: number;
+  enable_files?: boolean;              // Enable file attachments (default: true)
+  max_files_per_note?: number;         // Default: 5
+  allowed_file_types?: string[];       // Default: ['pdf', 'png', 'jpg', ...]
+  max_file_size_mb?: number;           // Default: 10
 
   // Callbacks
-  on_open?: () => void;
-  on_close?: () => void;
+  on_open?: () => void;                // Called when panel opens
+  on_close?: () => void;               // Called when panel closes
 
   // Styling
-  disabled?: boolean;
-  className?: string;
+  disabled?: boolean;                  // Disable and hide the component
+  className?: string;                  // Additional CSS classes
+  icon_size?: number;                  // Button size in pixels (default: 28)
+  show_border?: boolean;               // Show border around button (default: true)
 }
 ```
+
+**Note:** The component bundles Radix UI primitives internally. No UI component props are required.
 
 ## Hooks API
 
@@ -601,42 +606,25 @@ Each note entry in the JSONB array:
 
 ## Troubleshooting
 
-### Notes icon doesn't open panel
+### Notes icon doesn't render
 
-**Problem**: Icon renders but clicking shows "Notes unavailable - pass popover_components prop" tooltip.
+**Problem**: The HazoNotesIcon component doesn't appear.
 
-**Cause**: The component cannot auto-import UI components across package boundaries.
+**Possible Causes**:
+1. Missing `ref_id` prop - The component requires a valid `ref_id` and will not render without one
+2. `disabled={true}` is set
+3. Tailwind CSS is not configured
 
-**Solution**: You must explicitly pass the UI components prop:
-
+**Solution**:
 ```tsx
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-
-const popover_components = { Popover, PopoverTrigger, PopoverContent };
-
+// Check that ref_id is provided and valid
 <HazoNotesIcon
-  ref_id="my-notes"
-  popover_components={popover_components}  // Required!
+  ref_id="my-field-123"  // Required - must be a non-empty string
+  label="My Notes"
 />
 ```
 
-For slide panel style, use `sheet_components` instead:
-```tsx
-import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
-
-const sheet_components = { Sheet, SheetTrigger, SheetContent };
-
-<HazoNotesIcon
-  ref_id="my-notes"
-  panel_style="slide_panel"
-  sheet_components={sheet_components}
-/>
-```
-
-Make sure you also have the required dependencies:
-```bash
-npm install @radix-ui/react-popover @radix-ui/react-dialog
-```
+In development, a console warning will appear if `ref_id` is missing.
 
 ### User shows as "Unknown User"
 

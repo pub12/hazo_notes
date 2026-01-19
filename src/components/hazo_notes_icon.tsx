@@ -7,7 +7,7 @@
  * Supports both controlled and uncontrolled modes
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import type { HazoNotesIconProps, NoteUserInfo, NoteEntry, NewNoteInput } from '../types/index.js';
 import { cn } from '../utils/cn.js';
@@ -63,6 +63,16 @@ export function HazoNotesIcon({
 }: HazoNotesIconProps) {
   const logger = use_logger();
 
+  // Validate ref_id
+  if (!ref_id) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(
+        '[HazoNotesIcon] ref_id is required. Component will not render without a valid ref_id.'
+      );
+    }
+    return null;
+  }
+
   // Apply defaults with nullish coalescing - handles explicit undefined from wrapper components
   const effective_panel_style = panel_style ?? 'popover';
   const effective_save_mode = save_mode ?? 'explicit';
@@ -72,6 +82,35 @@ export function HazoNotesIcon({
   const [internal_open, set_internal_open] = useState(default_open);
   const is_controlled_open = controlled_open !== undefined;
   const is_open = is_controlled_open ? controlled_open : internal_open;
+
+  // Delayed opening for controlled mode to prevent dropdown close conflicts
+  const open_timeout_ref = useRef<NodeJS.Timeout | null>(null);
+  const [delayed_open, set_delayed_open] = useState(false);
+
+  useEffect(() => {
+    if (open_timeout_ref.current) {
+      clearTimeout(open_timeout_ref.current);
+      open_timeout_ref.current = null;
+    }
+
+    if (is_controlled_open && controlled_open) {
+      // Delay opening by 100ms to prevent dropdown close conflicts
+      open_timeout_ref.current = setTimeout(() => {
+        set_delayed_open(true);
+      }, 100);
+    } else if (is_controlled_open) {
+      set_delayed_open(false);
+    }
+
+    return () => {
+      if (open_timeout_ref.current) {
+        clearTimeout(open_timeout_ref.current);
+      }
+    };
+  }, [is_controlled_open, controlled_open]);
+
+  // Use delayed_open for controlled mode, is_open for uncontrolled mode
+  const effective_is_open = is_controlled_open ? delayed_open : is_open;
 
   const [fetched_user, set_fetched_user] = useState<NoteUserInfo | null>(null);
 
@@ -236,7 +275,7 @@ export function HazoNotesIcon({
   if (effective_panel_style === 'popover') {
     return (
       <div className="cls_hazo_notes_icon_wrapper">
-        <Popover.Root open={is_open} onOpenChange={handle_open_change}>
+        <Popover.Root open={effective_is_open} onOpenChange={handle_open_change}>
           <Popover.Trigger asChild>{trigger_button}</Popover.Trigger>
           <Popover.Portal>
             <Popover.Content
@@ -267,7 +306,7 @@ export function HazoNotesIcon({
   if (effective_panel_style === 'slide_panel') {
     return (
       <div className="cls_hazo_notes_icon_wrapper">
-        <Sheet open={is_open} onOpenChange={handle_open_change}>
+        <Sheet open={effective_is_open} onOpenChange={handle_open_change}>
           <SheetTrigger asChild>{trigger_button}</SheetTrigger>
           <SheetContent>
             {HazoNotesPanelComponent && <HazoNotesPanelComponent {...panel_props} />}
